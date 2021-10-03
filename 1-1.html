@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Load React. -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <!-- Load Material UI. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.development.js"></script>
+
+  <style>
+    .link:visited {
+      color: green;
+    }
+  </style>
+
+  <title>Задание 1</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const {
+      createTheme,
+      makeStyles,
+
+      Box,
+      Typography,
+      TextField,
+      Button,
+      ButtonGroup,
+      Link,
+
+      ThemeProvider,
+      Container,
+      CssBaseline,
+    } = MaterialUI;
+    const {
+      useState,
+      useEffect,
+    } = React;
+
+    const theme = createTheme({
+      palette: {
+        primary: {
+          main: '#556cd6',
+        },
+        secondary: {
+          main: '#19857b',
+        },
+        background: {
+          default: '#fff',
+        },
+      },
+    });
+
+    const useStyles = makeStyles((theme) => ({
+      content: {
+        display: 'flex',
+        flex: '1 1 auto',
+        flexFlow: 'column',
+        minHeight: '100vh',
+        position: 'relative',
+      },
+    }));
+
+    function Copyright() {
+      return (
+        <Box my={2}>
+          <Typography variant="h4">
+            Чакирян Андраник Акопович. Задание 1. Вариант 3.
+          </Typography>
+        </Box>
+      );
+    }
+
+    function Task() {
+      return (
+        <Typography variant="subtitle1" align="justify" gutterBottom>
+          В HTML-документе определены 2 формы.
+          На первой управляющие кнопки и поля ввода, вторая  - пустая.
+          При нажатии на кнопки первой формы на второй форме генерируются элементы (а).
+          Параметры и количество элементов определяются в элементах 1-й формы(б),
+          а также заданы в виде массивов на JavaScript.
+          После построения элементов на второй форме по некоторым кнопкам/элементам
+          можно произвести некоторые действия (в), результаты которых отображаются на 2-форме.
+          Для генерации элементов и вывода результатов использовать свойство innerHTML.
+          Примечание. Уточнения постановки производить самостоятельно.
+        </Typography>
+      );
+    }
+
+    function FirstForm() {
+      const [links, setLinks] = useState([]);
+
+      const defaultLink = "http://example.org";
+      const addLink = () => {
+        setLinks(
+          [...links, defaultLink]
+        );
+      };
+      const removeLink = () => {
+        links.pop();
+        setLinks([...links]);
+      };
+      const updateLink = (id, value) => {
+        links[id] = value;
+        setLinks([...links]);
+      };
+      console.log(links);
+
+      return (
+        <Box my={2} >
+          <Typography variant="h5" component="h1" gutterBottom>
+            Первая форма
+          </Typography>
+          <ButtonGroup
+            variant="text"
+          >
+            <Button onClick={addLink}>Добавить</Button>
+            <Button onClick={removeLink}>Убрать</Button>
+          </ButtonGroup>
+          {links.map((url, id) => {
+            const onChange = (e) => {
+              updateLink(id, e.target.value);
+            };
+
+            return (
+              <Box key={id} my={2}>
+                <TextField
+                  defaultValue={defaultLink}
+                  variant="standard"
+                  onChange={onChange}
+                />
+              </Box>
+            );
+          })}
+          <SecondForm links={links} />
+        </Box>
+      );
+    }
+
+    function SecondForm(props) {
+      const colors = [
+        'red',
+        'green',
+        'pink',
+        'blue',
+      ];
+      const [colorId, setColorId] = useState(0);
+      const changeColor = () => {
+        setColorId((colorId + 1) % 4);
+        document.body.link = colors[colorId];
+      };
+      useEffect(() => {
+        document.body.link = colors[colorId];
+      })
+
+      const links = props.links.map(
+        (link, id) => {
+          return (
+            <Box my={2} key={id}>
+              <a href={link}>{link}</a>
+            </Box>
+          );
+        }
+      );
+
+      return (
+        <Box my={2}>
+          <Typography variant="h5" component="h1" gutterBottom>
+            Вторая форма
+          </Typography>
+          <Button
+            onClick={changeColor}
+          >
+            Поменять цвет
+          </Button>
+          {links}
+        </Box>
+      );
+    }
+
+    function App() {
+      const classes = useStyles();
+
+      return (
+        <Container
+          className={classes.content}
+          maxWidth="lg"
+        >
+          <Copyright />
+          <Task />
+          <FirstForm />
+        </Container>
+      );
+    }
+
+    ReactDOM.render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+
+</html>
