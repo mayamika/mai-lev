@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Load React. -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <!-- Load Material UI. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.development.js"></script>
+
+  <title>Задание 1</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const {
+      createTheme,
+      makeStyles,
+
+      Box,
+      Typography,
+      TextField,
+      Button,
+      ButtonGroup,
+      Link,
+
+      Collapse,
+      IconButton,
+      Table,
+      TableBody,
+      TableCell,
+      TableContainer,
+      TableHead,
+      TableRow,
+      Paper,
+      Icon,
+      Grid,
+
+      ThemeProvider,
+      Container,
+      CssBaseline,
+    } = MaterialUI;
+    const {
+      useState,
+      useEffect,
+      useRef,
+    } = React;
+
+    function Copyright() {
+      return (
+        <Box my={2}>
+          <Typography variant="h4" component="h2">
+            Чакирян Андраник Акопович. Задание 2. Вариант 19.
+          </Typography>
+        </Box>
+      );
+    }
+
+    function Task() {
+      return (
+        <Typography
+          variant="body1"
+          component="span"
+          align="justify"
+        >
+          Cправочник должен:
+          <br />- содержать 4 поля, первое поле ключевое;
+          <br />- добавление элемента справочника при вводе # в конце всех значений;
+          <br />- позволять удалять отдельные элементы по кнопке в отдельной колонке каждого элемента;
+          <br />- позволять изменять отдельные элементы;
+        </Typography>
+      );
+    }
+
+    function EntryForm(props) {
+      const { initialValue } = props;
+
+      const [error, setError] = useState('');
+
+      const [id, setId] = useState(initialValue ? initialValue.id : '');
+      const [name, setName] = useState(initialValue ? initialValue.name : '');
+      const [surname, setSurname] = useState(initialValue ? initialValue.surname : '');
+      const [university, setUniversity] = useState(initialValue ? initialValue.university : '');
+      const submit = () => {
+        const onSubmit = props.onSubmit;
+        try {
+          onSubmit && onSubmit({
+            id: id,
+            name: name,
+            surname: surname,
+            university: university,
+          });
+        } catch (e) {
+          setError(e);
+          return;
+        }
+
+        setId('');
+        setName('');
+        setSurname('');
+        setUniversity('');
+      };
+
+      const setField = (value, set) => {
+        if (value.slice(-1) == "#") {
+          submit();
+          return;
+        }
+        set(value);
+      };
+
+      return (
+        <Box
+          component="form"
+          noValidate
+          autoComplete="off"
+
+        >
+          <Grid
+            container
+            alignItems="flex-start"
+            direction="row"
+            spacing={1}
+            justifyContent="center"
+          >
+            <Grid item>
+              <TextField
+                error={error != ''}
+                id="input-id"
+
+                label="СНИЛС"
+                variant="outlined"
+
+                value={id}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setId);
+                }}
+                helperText={error}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="input-name"
+
+                label="Имя"
+                variant="outlined"
+
+                value={name}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setName);
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="input-surname"
+
+                label="Фамилия"
+                variant="outlined"
+
+                value={surname}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setSurname);
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="input-university"
+
+                label="ВУЗ"
+                variant="outlined"
+
+                value={university}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setUniversity);
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      );
+    }
+
+    function useLocalStorage(key, initialValue) {
+      // State to store our value
+      // Pass initial state function to useState so logic is only executed once.
+      const [storedValue, setStoredValue] = React.useState(() => {
+        try {
+          // Get from local storage by key.
+          const item = window.localStorage.getItem(key);
+          // Parse stored json or if none return initialValue.
+          return item ? JSON.parse(item) : initialValue;
+        } catch (error) {
+          // If error also return initialValue.
+          console.log(error);
+          return initialValue;
+        }
+      });
+      // Return a wrapped version of useState's setter function that ...
+      // ... persists the new value to localStorage.
+      const setValue = (value) => {
+        try {
+          // Allow value to be a function so we have same API as useState.
+          const valueToStore =
+            value instanceof Function ? value(storedValue) : value;
+          // Save state.
+          setStoredValue(valueToStore);
+          // Save to local storage.
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      return [storedValue, setValue];
+    }
+
+    function Handbook() {
+      const Title = () => {
+        return (
+          <Box my={2}>
+            <Typography
+              variant="h4"
+              component="h2"
+            >
+              Справочник
+            </Typography>
+          </Box>
+        );
+      };
+
+      const [entries, setEntries] = useLocalStorage('mayami-storage', {});
+      console.log(entries);
+
+      const validateId = (id) => {
+        if (id in entries) {
+          throw 'СНИЛС уже занят'
+        }
+        if (id == '') {
+          throw 'СНИЛС не указан'
+        }
+      };
+      const addEntry = (e) => {
+        validateId(e.id);
+        entries[e.id] = e;
+        setEntries({ ...entries });
+      };
+      const updateEntry = (id, e) => {
+        if (id != e.id) {
+          validateId(e.id);
+          delete entries[id];
+        }
+        entries[e.id] = e;
+        setEntries({ ...entries });
+      }
+      const removeEntry = (id) => {
+        console.log(id);
+        delete entries[id];
+        setEntries({ ...entries });
+      }
+
+      function Row(props) {
+        const { entry } = props;
+        const [open, setOpen] = React.useState(false);
+
+        return (
+          <React.Fragment>
+            <TableRow
+              sx={{
+                '& > *': { borderBottom: 'unset' },
+                maxWidth: '5',
+              }}
+            >
+              <TableCell>
+                <IconButton
+                  aria-label="expand row"
+                  size="small"
+                  onClick={() => setOpen(!open)}
+                >
+                  {open ? <Icon>expand_less</Icon> : <Icon>expand_more</Icon>}
+                </IconButton>
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {entry.id}
+              </TableCell>
+              <TableCell align="right" >{entry.name}</TableCell>
+              <TableCell align="right">{entry.surname}</TableCell>
+              <TableCell align="right">{entry.university}</TableCell>
+              <TableCell align="right">
+                <Button onClick={() => removeEntry(entry.id)}>Убрать</Button>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                <Collapse in={open} timeout="auto" unmountOnExit>
+                  <Box my={1}>
+                    <Typography variant="h5" component="h5" gutterBottom>
+                      Редактирование
+                    </Typography>
+                  </Box>
+                  <Box my={2}>
+                    <Grid container justifyContent="center">
+                      <EntryForm
+                        onSubmit={(newEntry) => { updateEntry(entry.id, newEntry) }}
+                        initialValue={entry}
+                      />
+                    </Grid>
+                  </Box>
+                </Collapse>
+              </TableCell>
+            </TableRow>
+          </React.Fragment >
+        );
+      }
+
+      const CollapsibleTable = () => {
+        return (
+          <TableContainer component={Paper}>
+            <Table aria-label="collapsible table">
+              <TableHead>
+                <TableRow>
+                  <TableCell />
+                  <TableCell>СНИЛС</TableCell>
+                  <TableCell align="right">Имя</TableCell>
+                  <TableCell align="right">Фамилия</TableCell>
+                  <TableCell align="right">ВУЗ</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Object.entries(entries).map(([id, entry]) => (
+                  <Row key={id} entry={entry} />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        );
+      };
+
+      return (
+        <div>
+          <Title />
+          <Grid
+            container
+            direction="column"
+            spacing={5}
+          >
+            <Grid item>
+              <EntryForm onSubmit={addEntry} />
+            </Grid>
+            <Grid item>
+              <CollapsibleTable />
+            </Grid>
+          </Grid>
+        </div>
+      );
+    }
+
+    const theme = createTheme({
+      palette: {
+        primary: {
+          main: '#556cd6',
+        },
+        secondary: {
+          main: '#19857b',
+        },
+        background: {
+          default: '#fff',
+        },
+      },
+    });
+
+    const useStyles = makeStyles((theme) => ({
+      content: {
+        display: 'flex',
+        flex: '1 1 auto',
+        flexFlow: 'column',
+        minHeight: '100vh',
+        position: 'relative',
+        'max-width': '1000px',
+      },
+    }));
+
+    function App() {
+      const classes = useStyles();
+
+      return (
+        <Container
+          className={classes.content}
+          maxWidth="lg"
+        >
+          <Copyright />
+          <Task />
+          <Handbook />
+        </Container>
+      );
+    }
+
+    ReactDOM.render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+
+</html>
