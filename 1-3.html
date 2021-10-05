@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Load React. -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <!-- Load Material UI. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.development.js"></script>
+
+  <!-- Load Axios. -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <title>Задание 1</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const {
+      createTheme,
+      makeStyles,
+
+      Box,
+      Typography,
+      TextField,
+      Button,
+      ButtonGroup,
+      Link,
+
+      Collapse,
+      IconButton,
+      Table,
+      TableBody,
+      TableCell,
+      TableContainer,
+      TableHead,
+      TableRow,
+      Paper,
+      Icon,
+      Grid,
+
+      ThemeProvider,
+      Container,
+      CssBaseline,
+    } = MaterialUI;
+    const {
+      useState,
+      useEffect,
+      useRef,
+    } = React;
+
+    function Copyright() {
+      return (
+        <Box my={2}>
+          <Typography variant="h4" component="h2">
+            Чакирян Андраник Акопович. Задание 3. Вариант 19.
+          </Typography>
+        </Box>
+      );
+    }
+
+    function Task() {
+      return (
+        <Typography
+          variant="body1"
+          component="span"
+          align="justify"
+        >
+          Cправочник должен:
+          <br />- содержать 4 поля, первое поле ключевое;
+          <br />- добавление элемента справочника при вводе # в конце всех значений;
+          <br />- позволять удалять отдельные элементы по кнопке в отдельной колонке каждого элемента;
+          <br />- позволять изменять отдельные элементы;
+          <br />- данные хранятся в postgresql;
+        </Typography>
+      );
+    }
+
+    function EntryForm(props) {
+      const { initialValue } = props;
+
+      const [error, setError] = useState('');
+
+      const [id, setId] = useState(initialValue ? initialValue.id : '');
+      const [name, setName] = useState(initialValue ? initialValue.name : '');
+      const [surname, setSurname] = useState(initialValue ? initialValue.surname : '');
+      const [university, setUniversity] = useState(initialValue ? initialValue.university : '');
+      const submit = () => {
+        const onSubmit = props.onSubmit;
+        try {
+          onSubmit && onSubmit({
+            id: id,
+            name: name,
+            surname: surname,
+            university: university,
+          });
+          setError('');
+        } catch (e) {
+          setError(e);
+          return;
+        }
+
+        setId('');
+        setName('');
+        setSurname('');
+        setUniversity('');
+      };
+
+      const setField = (value, set) => {
+        if (value.slice(-1) == "#") {
+          submit();
+          return;
+        }
+        set(value);
+      };
+
+      return (
+        <Box
+          component="form"
+          noValidate
+          autoComplete="off"
+
+        >
+          <Grid
+            container
+            alignItems="flex-start"
+            direction="row"
+            spacing={1}
+            justifyContent="center"
+          >
+            <Grid item>
+              <TextField
+                error={error != ''}
+                id="input-id"
+
+                label="СНИЛС"
+                variant="outlined"
+
+                value={id}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setId);
+                }}
+                helperText={error}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="input-name"
+
+                label="Имя"
+                variant="outlined"
+
+                value={name}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setName);
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="input-surname"
+
+                label="Фамилия"
+                variant="outlined"
+
+                value={surname}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setSurname);
+                }}
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="input-university"
+
+                label="ВУЗ"
+                variant="outlined"
+
+                value={university}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setField(text, setUniversity);
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      );
+    }
+
+    function Handbook() {
+      const Title = () => {
+        return (
+          <Box my={2}>
+            <Typography
+              variant="h4"
+              component="h2"
+            >
+              Справочник
+            </Typography>
+          </Box>
+        );
+      };
+
+      const api = axios.create({
+        baseURL: `http://localhost:8080/api`,
+      });
+
+      const [entries, setEntries] = useState({});
+      const loadEntries = () => {
+        api.get('/entries')
+          .then((res) => {
+            const data = res.data;
+
+            const loaded = {};
+            if (data != null) {
+              for (const v of data) {
+                loaded[v.id] = v;
+              }
+            }
+            setEntries(loaded);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      };
+      useEffect(() => {
+        loadEntries();
+      }, []);
+
+      const validateId = (id) => {
+        if (id in entries) {
+          throw 'СНИЛС уже занят'
+        }
+        if (id == '') {
+          throw 'СНИЛС не указан'
+        }
+      };
+      const addEntry = (e) => {
+        validateId(e.id);
+
+        api.post('/entries', e)
+          .then(() => {
+            loadEntries();
+          }).catch((error) => {
+            console.log(error);
+          });
+      };
+      const updateEntry = (id, e) => {
+        api.patch(`/entries/${id}`, e)
+          .then(() => {
+            loadEntries();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+      const removeEntry = (id) => {
+        api.delete(`/entries/${id}`)
+          .then(() => {
+            loadEntries();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      function Row(props) {
+        const { entry } = props;
+        const [open, setOpen] = React.useState(false);
+
+        return (
+          <React.Fragment>
+            <TableRow
+              sx={{
+                '& > *': { borderBottom: 'unset' },
+                maxWidth: '5',
+              }}
+            >
+              <TableCell>
+                <IconButton
+                  aria-label="expand row"
+                  size="small"
+                  onClick={() => setOpen(!open)}
+                >
+                  {open ? <Icon>expand_less</Icon> : <Icon>expand_more</Icon>}
+                </IconButton>
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {entry.id}
+              </TableCell>
+              <TableCell align="right" >{entry.name}</TableCell>
+              <TableCell align="right">{entry.surname}</TableCell>
+              <TableCell align="right">{entry.university}</TableCell>
+              <TableCell align="right">
+                <Button onClick={() => removeEntry(entry.id)}>Убрать</Button>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                <Collapse in={open} timeout="auto" unmountOnExit>
+                  <Box my={1}>
+                    <Typography variant="h5" component="h5" gutterBottom>
+                      Редактирование
+                    </Typography>
+                  </Box>
+                  <Box my={2}>
+                    <Grid container justifyContent="center">
+                      <EntryForm
+                        onSubmit={(newEntry) => { updateEntry(entry.id, newEntry) }}
+                        initialValue={entry}
+                      />
+                    </Grid>
+                  </Box>
+                </Collapse>
+              </TableCell>
+            </TableRow>
+          </React.Fragment >
+        );
+      }
+
+      const CollapsibleTable = () => {
+        return (
+          <TableContainer component={Paper}>
+            <Table aria-label="collapsible table">
+              <TableHead>
+                <TableRow>
+                  <TableCell />
+                  <TableCell>СНИЛС</TableCell>
+                  <TableCell align="right">Имя</TableCell>
+                  <TableCell align="right">Фамилия</TableCell>
+                  <TableCell align="right">ВУЗ</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Object.entries(entries).map(([id, entry]) => (
+                  <Row key={id} entry={entry} />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        );
+      };
+
+      return (
+        <div>
+          <Title />
+          <Grid
+            container
+            direction="column"
+            spacing={5}
+          >
+            <Grid item>
+              <EntryForm onSubmit={addEntry} />
+            </Grid>
+            <Grid item>
+              <CollapsibleTable />
+            </Grid>
+          </Grid>
+        </div>
+      );
+    }
+
+    const theme = createTheme({
+      palette: {
+        primary: {
+          main: '#556cd6',
+        },
+        secondary: {
+          main: '#19857b',
+        },
+        background: {
+          default: '#fff',
+        },
+      },
+    });
+
+    const useStyles = makeStyles((theme) => ({
+      content: {
+        display: 'flex',
+        flex: '1 1 auto',
+        flexFlow: 'column',
+        minHeight: '100vh',
+        position: 'relative',
+        'max-width': '1000px',
+      },
+    }));
+
+    function App() {
+      const classes = useStyles();
+
+      return (
+        <Container
+          className={classes.content}
+          maxWidth="lg"
+        >
+          <Copyright />
+          <Task />
+          <Handbook />
+        </Container>
+      );
+    }
+
+    ReactDOM.render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+
+</html>
