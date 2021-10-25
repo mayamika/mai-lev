@@ -1,0 +1,13 @@
+.child-node {
+}
+
+.node {
+    margin: 20px;
+    border: 2px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+.node-data {
+    margin: 15px;
+}
