@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Load React. -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <!-- Load Material UI. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.development.js"></script>
+
+  <!-- Load Axios. -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- Load JQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+    crossorigin="anonymous"></script>
+
+  <title>Задание 1</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const {
+      createTheme,
+      makeStyles,
+
+      Box,
+      Typography,
+      TextField,
+      Button,
+      ButtonGroup,
+      Link,
+
+      Collapse,
+      IconButton,
+      Table,
+      TableBody,
+      TableCell,
+      TableContainer,
+      TableHead,
+      TableRow,
+      Paper,
+      Icon,
+      Grid,
+
+      ThemeProvider,
+      Container,
+      CssBaseline,
+    } = MaterialUI;
+    const {
+      useState,
+      useEffect,
+      useRef,
+    } = React;
+
+    function Copyright() {
+      return (
+        <Box my={2}>
+          <Typography variant="h4" component="h2">
+            Чакирян Андраник Акопович. Задание 4. Вариант 19.
+          </Typography>
+        </Box>
+      );
+    }
+
+    function Task() {
+      const ListItem = (props) => {
+        const { id, name, description } = props.item;
+
+        const liId = `${id}`;
+        const textId = `${id}-text`;
+
+        useEffect(() => {
+          const selectLi = $(`#${liId}`);
+          const selectText = $(`#${textId}`);
+
+          const offset = selectLi.offset();
+
+          selectLi.mouseenter(() => {
+            selectLi.siblings().stop().fadeTo(200, 0.4);
+            selectLi.stop().fadeTo(200, 1);
+
+            selectText.stop().fadeIn(200);
+          });
+          selectLi.mouseleave(() => {
+            selectText.stop().fadeOut(200);
+          });
+        }, []);
+
+        return (
+          <li id={liId} style={{ height: '35px' }}>
+            <Grid
+              container
+              direction="row"
+              justifyContent="flex-start"
+              alignItems="center"
+              spacing={1}
+            >
+              <Grid item>
+                {name}
+              </Grid>
+              <Grid item id={textId} style={{ display: "none" }}>
+                {description}
+              </Grid>
+            </Grid>
+          </li >
+        );
+      };
+
+      const [functions, setFunctions] = useState([
+        {
+          id: "val",
+          name: "val()",
+          description: "Возвращает текущее значение элемента input, select, textarea.",
+        },
+        {
+          id: "position",
+          name: "position(), offset()",
+          description: "Возвращает текущее положение и смещение элемента.",
+        },
+        {
+          id: "reset",
+          name: ":reset",
+          description: "Выбирает элементы с типом reset.",
+        },
+        {
+          id: "scroll-left",
+          name: "scrollLeft()",
+          description: "Возвращает позицию горизонтального скроллбара.",
+        },
+        {
+          id: "append",
+          name: "append(), appendTo()",
+          description: "Добавляет объект в конец элемента.",
+        },
+        {
+          id: "prev-all",
+          name: "prevAll()",
+          description: "Выбирает все соседние элементы объявленные сверху.",
+        },
+        {
+          id: "on",
+          name: "on()",
+          description: "Позволяет добавить обработчик события.",
+        },
+        {
+          id: "mouse-enter",
+          name: "mouseenter()",
+          description: "Позволяет добавить обработчик события наведения мыши.",
+        },
+        {
+          id: "submit",
+          name: "submit()",
+          description: "Позволяет добавить обработчик события submit.",
+        },
+        {
+          id: "fade-toggle",
+          name: "fadeToggle()",
+          description: "Переключает эффект затухания.",
+        }
+      ]);
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      const [needFadeIn, setNeedFadeIn] = useState(false);
+      const shuffle = () => {
+        shuffleArray(functions);
+        setFunctions([...functions]);
+        setNeedFadeIn(true);
+      };
+
+      useEffect(() => {
+        if (needFadeIn) {
+          $("#list").fadeIn(500);
+        }
+      });
+      useEffect(() => {
+        $("#button-shuffle").submit(() => {
+          $("#list").fadeOut(500, () => {
+            shuffle();
+          });
+        });
+
+        $("#list").mouseleave(() => {
+          $("li").stop().fadeTo(200, 1);
+        });
+
+        $("#prev-all").on("")
+      }, []);
+
+      return (
+        <Box>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Список функций
+          </Typography>
+          <Button
+            id="button-shuffle"
+            onClick={(e) => { $("#button-shuffle").submit(); }}
+          >
+            Перемешать
+          </Button>
+          <div id="list">
+            <Typography
+              variant="body1"
+              component="span"
+              align="justify"
+            >
+              <ol style={{ margin: 0 }}>
+                {functions.map((fn, idx) => <ListItem key={idx} item={fn} />)}
+              </ol>
+            </Typography >
+          </div>
+        </Box>
+      );
+    }
+
+    function Examples() {
+      useEffect(() => {
+        $("#add-button").on("click", () => {
+          let val = $("#text-input").val();
+          if (val == "") {
+            val = "Произвольное значение";
+          }
+          $("#example-list-head").append(`<li>${val}</li>`);
+        });
+
+        $("#example-form").submit(() => {
+          console.log("submit");
+        });
+
+        $("#move-button").on("click", () => {
+          const offset = $("#example-list li").first().offset();
+          console.log(offset);
+          $("#example-list li").offset({
+            left: offset.left + 10,
+          });
+        });
+      }, []);
+
+      return (
+        <Box my={2}>
+          <Typography
+            variant="h5"
+            component="h2"
+            gutterBottom
+          >
+            Примеры
+          </Typography>
+
+          <Grid
+            container
+            direction="column"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+            spacing={1}
+          >
+            <Grid item >
+              <TextField id="text-input" label="Текст" />
+            </Grid>
+            <Grid item>
+              <Button id="add-button">Использовать силу append()</Button>
+            </Grid>
+            <Grid item>
+              <Button id="move-button">Использовать силу position()</Button>
+            </Grid>
+          </Grid>
+          <ol id="example-list">
+            <Typography
+              variant="body1"
+              component="span"
+              align="justify"
+            >
+              <div id="example-list-head" />
+            </Typography>
+          </ol>
+        </Box >
+      );
+    }
+
+    const theme = createTheme({
+      palette: {
+        primary: {
+          main: '#556cd6',
+        },
+        secondary: {
+          main: '#19857b',
+        },
+        background: {
+          default: '#fff',
+        },
+      },
+    });
+
+    const useStyles = makeStyles((theme) => ({
+      content: {
+        display: 'flex',
+        flex: '1 1 auto',
+        flexFlow: 'column',
+        minHeight: '100vh',
+        position: 'relative',
+        'max-width': '1000px',
+      },
+    }));
+
+    function App() {
+      const classes = useStyles();
+
+      return (
+        <Container
+          className={classes.content}
+          maxWidth="lg"
+        >
+          <Copyright />
+          <Task />
+          <Examples />
+        </Container>
+      );
+    }
+
+    ReactDOM.render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+
+</html>
