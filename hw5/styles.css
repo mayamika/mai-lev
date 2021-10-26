@@ -1,13 +1,28 @@
-.child-node {
+.title {
+    margin: 10px;
 }
 
 .node {
-    margin: 20px;
-    border: 2px;
-    border-style: solid;
-    border-collapse: collapse;
+    margin: 20px 0px 0px 20px;
 }
 
 .node-data {
+    padding: 15px;
+    background-color: #EAFDC5;
     margin: 15px;
+}
+
+.key {
+
+}
+
+.value {
+    width: 100%;
+}
+
+table {
+    border: solid thin #ffcc66;
+    display: table;
+    box-sizing: border-box;
+    text-indent: initial;
 }
