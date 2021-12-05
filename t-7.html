@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Load React. -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <!-- Load Material UI. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.development.js"></script>
+
+  <title>Задание 7</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const {
+      createTheme,
+      makeStyles,
+
+      Box,
+      Typography,
+      TextField,
+      Button,
+      ButtonGroup,
+      Link,
+
+      Collapse,
+      IconButton,
+      Table,
+      TableBody,
+      TableCell,
+      TableContainer,
+      TableHead,
+      TableRow,
+      Paper,
+      Icon,
+      Grid,
+
+      ThemeProvider,
+      Container,
+      CssBaseline,
+    } = MaterialUI;
+    const {
+      useState,
+      useEffect,
+      useRef,
+    } = React;
+
+    function Copyright() {
+      return (
+        <Box my={2}>
+          <Typography variant="h4" component="h2">
+            Чакирян Андраник Акопович. Задание 7. Вариант C-5.
+          </Typography>
+        </Box>
+      );
+    }
+
+    function Task() {
+      return (
+        <Typography variant="subtitle1" align="justify" gutterBottom>
+          Написать компонент InputText - которому можно передать параметры max и min.
+          Если пользователь вбивает 2 символа,
+          а min стоит 3 - то выводить "Вам нужно ввести минимум 3 символа"
+          (или то, которое мы передали в min).<br />
+          Тоже самое и с max - если указал больше чем передали выводить
+          (Нельзя ввести больше чем "число из параметра max").
+        </Typography>
+      );
+    }
+
+    function InputText(props) {
+      const { min, max, value } = props;
+      const [helperText, setHelperText] = useState('');
+
+      if (min > max) {
+        throw "min can't be greater than max";
+      }
+
+      const check = (text) => {
+        if (text.length >= min && text.length <= max) {
+          setHelperText('');
+        }
+        if (text.length < min) {
+          setHelperText(`Минимальная длинна ${min}`);
+        }
+        if (text.length > max) {
+          setHelperText(`Максимальная длинна ${max}`);
+        }
+      };
+      useEffect(() => {
+        check(value);
+      }, []);
+
+      const onChange = (e) => {
+        e.preventDefault();
+        const text = e.target.value;
+
+        check(text);
+      };
+
+      const error = helperText != "";
+
+      return (
+        <TextField
+          error={error}
+          variant="outlined"
+          onChange={onChange}
+          helperText={helperText}
+          defaultValue={value}
+        />
+      );
+    }
+    InputText.defaultProps = {
+      min: 4,
+      max: 8,
+      value: "",
+    };
+
+    const theme = createTheme({
+      palette: {
+        primary: {
+          main: '#556cd6',
+        },
+        secondary: {
+          main: '#19857b',
+        },
+        background: {
+          default: '#fff',
+        },
+      },
+    });
+
+    const useStyles = makeStyles((theme) => ({
+      content: {
+        display: 'flex',
+        flex: '1 1 auto',
+        flexFlow: 'column',
+        minHeight: '100vh',
+        position: 'relative',
+        'max-width': '1000px',
+      },
+    }));
+
+    function App() {
+      const classes = useStyles();
+
+      return (
+        <Container
+          className={classes.content}
+          maxWidth="lg"
+        >
+          <Copyright />
+          <Task />
+          <Box>
+            <InputText min={8} max={14} value={"Привет 7 лаба"} />
+          </Box>
+        </Container>
+      );
+    }
+
+    ReactDOM.render(
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+
+</html>
